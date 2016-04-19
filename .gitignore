@@ -1,0 +1,5 @@
+# PYTHON MISC FILES
+*.pyc
+
+# IDE DETRITUS
+.idea/
