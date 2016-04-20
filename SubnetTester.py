@@ -9,13 +9,13 @@ SHORTCUT KEYS:
     * RETURN/ENTER -> Check answers (only if focus is on any of the
                                      guess entry boxes).
     * ALT + a      -> Toggle Class A CheckButton.
-    * ALT + s      -> Toggle Class B CheckButton.
-    * ALT + d      -> Toggle Class C CheckButton.
+    * ALT + b      -> Toggle Class B CheckButton.
+    * ALT + c      -> Toggle Class C CheckButton.
 
 AUTHOR:    T.WINN
 CREATED:   16 April 2016
-MODIFIED:
-VERSION:   1.0
+MODIFIED:  20 April 2016
+VERSION:   1.1
 """
 
 # STDLIB IMPORTS
@@ -74,11 +74,15 @@ class SubnetTester(gtk.Window):
         # ----------------------------------------------------------- #
         class_a_box = gtk.HBox()
 
-        class_a_label = gtk.Label("Class A: ")
+        class_a_label = gtk.Label()
+        class_a_label.set_text_with_mnemonic("Class _A:")
         class_a_box.pack_start(child=class_a_label, expand=False, fill=False, padding=0)
 
         self.class_a_check = gtk.CheckButton()
         self.class_a_check.connect("toggled", self._class_checkbutton_toggled, "class_a")
+
+        # assign the label mnemonic to the class_a_check
+        class_a_label.set_mnemonic_widget(self.class_a_check)
 
         # add the accelerator to assign "ALT+a" to toggle the
         # CheckButton.
@@ -95,18 +99,22 @@ class SubnetTester(gtk.Window):
         # ----------------------------------------------------------- #
         class_b_box = gtk.HBox()
 
-        class_b_label = gtk.Label("Class B: ")
+        class_b_label = gtk.Label()
+        class_b_label.set_text_with_mnemonic("Class _B:")
         class_b_box.pack_start(child=class_b_label, expand=False, fill=False, padding=0)
 
         self.class_b_check = gtk.CheckButton()
         self.class_b_check.connect("toggled", self._class_checkbutton_toggled, "class_b")
 
-        # add the accelerator to assign "ALT+s" to toggle the
+        # assign the label mnemonic to the class_b_check
+        class_b_label.set_mnemonic_widget(self.class_b_check)
+
+        # add the accelerator to assign "ALT+b" to toggle the
         # CheckButton.
         b_accel_group = gtk.AccelGroup()
         self.add_accel_group(b_accel_group)
         self.class_b_check.add_accelerator(accel_signal="clicked", accel_group=b_accel_group,
-                                           accel_key=gtk.gdk.keyval_from_name('s'),
+                                           accel_key=gtk.gdk.keyval_from_name('b'),
                                            accel_mods=gtk.gdk.MOD1_MASK, accel_flags=0)
 
         class_b_box.pack_start(child=self.class_b_check, expand=False, fill=False, padding=0)
@@ -116,7 +124,8 @@ class SubnetTester(gtk.Window):
         # ----------------------------------------------------------- #
         class_c_box = gtk.HBox()
 
-        class_c_label = gtk.Label("Class C: ")
+        class_c_label = gtk.Label()
+        class_c_label.set_text_with_mnemonic("Class _C:")
         class_c_box.pack_start(child=class_c_label, expand=False, fill=False, padding=0)
 
         self.class_c_check = gtk.CheckButton()
@@ -124,12 +133,15 @@ class SubnetTester(gtk.Window):
         self.class_c_check.set_active(True)
         self.class_c_check.connect("toggled", self._class_checkbutton_toggled, "class_c")
 
-        # add the accelerator to assign "ALT+d" to toggle the
+        # assign the label mnemonic to the class_c_check
+        class_c_label.set_mnemonic_widget(self.class_c_check)
+
+        # add the accelerator to assign "ALT+c" to toggle the
         # CheckButton.
         c_accel_group = gtk.AccelGroup()
         self.add_accel_group(c_accel_group)
         self.class_c_check.add_accelerator(accel_signal="clicked", accel_group=a_accel_group,
-                                           accel_key=gtk.gdk.keyval_from_name('d'),
+                                           accel_key=gtk.gdk.keyval_from_name('c'),
                                            accel_mods=gtk.gdk.MOD1_MASK, accel_flags=0)
 
         class_c_box.pack_start(child=self.class_c_check, expand=False, fill=False, padding=0)
