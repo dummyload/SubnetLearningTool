@@ -18,11 +18,12 @@ python SubnetTester.py
 ######Shortcuts
 | SHORTCUT | FUNCTION |
 |:--------:|:--------:|
-| CTRL + n | Generate a new network to guess. |
-| CTRL + r | Reveal the answers.              |
-| ALT + a  | Toggle Class A CheckButton.      |
-| ALT + b  | Toggle Class B CheckButton.      |
-| ALT + c  | Toggle Class C CheckButton.      |
+| CTRL + N | Generate a new network to guess. |
+| CTRL + R | Reveal the answers.              |
+| ALT + A  | Toggle Class A CheckButton.      |
+| ALT + B  | Toggle Class B CheckButton.      |
+| ALT + C  | Toggle Class C CheckButton.      |
+| ALT + T  | Toggle Timer On/Off.             |
 
 ---
 #####NOTE

@@ -8,14 +8,15 @@ SHORTCUT KEYS:
     * CTRL + R     -> Reveal the answers.
     * RETURN/ENTER -> Check answers (only if focus is on any of the
                                      guess entry boxes).
-    * ALT + a      -> Toggle Class A CheckButton.
-    * ALT + b      -> Toggle Class B CheckButton.
-    * ALT + c      -> Toggle Class C CheckButton.
+    * ALT + A      -> Toggle Class A CheckButton.
+    * ALT + B      -> Toggle Class B CheckButton.
+    * ALT + C      -> Toggle Class C CheckButton.
+    * ALT + T      -> Toggle Timer On/Off
 
 AUTHOR:    T.WINN
 CREATED:   16 April 2016
 MODIFIED:  20 April 2016
-VERSION:   1.1
+VERSION:   1.2
 """
 
 # STDLIB IMPORTS
@@ -41,12 +42,18 @@ class SubnetTester(gtk.Window):
         self.set_title(title="Subnet Tester")
         self.connect("delete-event", gtk.main_quit)
 
-        self.content_area = gtk.VBox()
-        self.add(self.content_area)
+        self._content_area = gtk.VBox()
+        self.add(self._content_area)
+
+        self._generate_file_menu()
 
         self._generate_class_option_frame()
 
-        self.content_area.pack_start(child=gtk.HSeparator(), expand=False, fill=False, padding=10)
+        self._content_area.pack_start(child=gtk.HSeparator(), expand=False, fill=False, padding=5)
+
+        # self._generate_timing_container()
+
+        self._content_area.pack_start(child=gtk.HSeparator(), expand=False, fill=False, padding=5)
         self._generate_network_to_guess_container()
         self._generate_guess_container()
 
@@ -58,9 +65,73 @@ class SubnetTester(gtk.Window):
 
         self._generate_network_to_guess()
 
+    def _parse_settings(self):
+        """
+        Parse the settings.ini file.
+        """
+
     ###########################################################################
     #                               UI GENERATION                             #
     ###########################################################################
+    def _generate_file_menu(self):
+        """
+        Generate the file menu.
+        """
+        menu_bar = gtk.MenuBar()
+
+        menu_acc = gtk.AccelGroup()
+        self.add_accel_group(menu_acc)
+
+        ###############################################################
+        #                             FILE                            #
+        ###############################################################
+        file_menu = gtk.Menu()
+        file_sub = gtk.MenuItem("_File")
+        file_sub.set_submenu(file_menu)
+
+        exit_item = gtk.ImageMenuItem(gtk.STOCK_QUIT)
+        key, modifier = gtk.accelerator_parse("<alt>F4")
+        exit_item.add_accelerator(accel_signal="activate", accel_group=menu_acc, accel_key=key,
+                                  accel_mods=modifier, accel_flags=gtk.ACCEL_VISIBLE)
+        exit_item.connect("activate", gtk.main_quit)
+        file_menu.append(exit_item)
+
+        menu_bar.append(file_sub)
+
+        ###############################################################
+        #                           SETTINGS                          #
+        ###############################################################
+        settings_menu = gtk.Menu()
+        settings_sub = gtk.MenuItem("_Settings")
+        settings_sub.set_submenu(settings_menu)
+
+        settings_item = gtk.MenuItem("Settings")
+        key, modifier = gtk.accelerator_parse("<alt>p")
+        settings_item.add_accelerator(accel_signal="activate", accel_group=menu_acc, accel_key=key,
+                                      accel_mods=modifier, accel_flags=gtk.ACCEL_VISIBLE)
+        # settings_item.connect("activate", NotImplementedError)
+        settings_menu.append(settings_item)
+
+        # ----------------------------------------------------------- #
+
+        separator = gtk.SeparatorMenuItem()
+        settings_menu.append(separator)
+
+        # ----------------------------------------------------------- #
+
+        timer_enable_item = gtk.CheckMenuItem("Timer")
+        # timer_enable_item.set_active(True)
+        key, modifier = gtk.accelerator_parse("<alt>t")
+        timer_enable_item.add_accelerator(accel_signal="activate", accel_group=menu_acc,
+                                          accel_key=key, accel_mods=modifier,
+                                          accel_flags=gtk.ACCEL_VISIBLE)
+        timer_enable_item.connect("toggled", self._timer_enabled_checkbutton_toggled)
+        settings_menu.append(timer_enable_item)
+
+        menu_bar.append(settings_sub)
+
+        self._content_area.pack_start(child=menu_bar, fill=False, expand=False, padding=0)
+
     def _generate_class_option_frame(self):
         """
         Generate the frame to select the class(es) to generate subnets
@@ -70,6 +141,9 @@ class SubnetTester(gtk.Window):
         class_frame.set_shadow_type(type=gtk.SHADOW_NONE)
         class_box = gtk.HBox()
         class_frame.add(class_box)
+
+        class_accel_group = gtk.AccelGroup()
+        self.add_accel_group(class_accel_group)
 
         # ----------------------------------------------------------- #
         class_a_box = gtk.HBox()
@@ -83,12 +157,7 @@ class SubnetTester(gtk.Window):
 
         # assign the label mnemonic to the class_a_check
         class_a_label.set_mnemonic_widget(self.class_a_check)
-
-        # add the accelerator to assign "ALT+a" to toggle the
-        # CheckButton.
-        a_accel_group = gtk.AccelGroup()
-        self.add_accel_group(a_accel_group)
-        self.class_a_check.add_accelerator(accel_signal="clicked", accel_group=a_accel_group,
+        self.class_a_check.add_accelerator(accel_signal="clicked", accel_group=class_accel_group,
                                            accel_key=gtk.gdk.keyval_from_name('a'),
                                            accel_mods=gtk.gdk.MOD1_MASK, accel_flags=0)
 
@@ -108,12 +177,7 @@ class SubnetTester(gtk.Window):
 
         # assign the label mnemonic to the class_b_check
         class_b_label.set_mnemonic_widget(self.class_b_check)
-
-        # add the accelerator to assign "ALT+b" to toggle the
-        # CheckButton.
-        b_accel_group = gtk.AccelGroup()
-        self.add_accel_group(b_accel_group)
-        self.class_b_check.add_accelerator(accel_signal="clicked", accel_group=b_accel_group,
+        self.class_b_check.add_accelerator(accel_signal="clicked", accel_group=class_accel_group,
                                            accel_key=gtk.gdk.keyval_from_name('b'),
                                            accel_mods=gtk.gdk.MOD1_MASK, accel_flags=0)
 
@@ -135,12 +199,7 @@ class SubnetTester(gtk.Window):
 
         # assign the label mnemonic to the class_c_check
         class_c_label.set_mnemonic_widget(self.class_c_check)
-
-        # add the accelerator to assign "ALT+c" to toggle the
-        # CheckButton.
-        c_accel_group = gtk.AccelGroup()
-        self.add_accel_group(c_accel_group)
-        self.class_c_check.add_accelerator(accel_signal="clicked", accel_group=a_accel_group,
+        self.class_c_check.add_accelerator(accel_signal="clicked", accel_group=class_accel_group,
                                            accel_key=gtk.gdk.keyval_from_name('c'),
                                            accel_mods=gtk.gdk.MOD1_MASK, accel_flags=0)
 
@@ -150,7 +209,44 @@ class SubnetTester(gtk.Window):
 
         # ----------------------------------------------------------- #
 
-        self.content_area.pack_start(child=class_frame, expand=False, fill=False, padding=10)
+        self._content_area.pack_start(child=class_frame, expand=False, fill=False, padding=10)
+
+    def _generate_timing_container(self):
+        """
+        Generate the container which will implement a timer to
+        count-down or count-up depending on the user's preference.
+        """
+        timer_frame = gtk.Frame(label=" Timer ")
+        timer_frame.set_shadow_type(type=gtk.SHADOW_ETCHED_IN)
+        timer_box = gtk.HBox()
+        timer_frame.add(timer_box)
+
+        # ----------------------------------------------------------- #
+        enable_label = gtk.Label()
+        enable_label.set_text_with_mnemonic("_Enable Timer:")
+
+        self.enable_timer_check = gtk.CheckButton()
+        self.enable_timer_check.connect("toggled", self._timer_enabled_checkbutton_toggled)
+
+        enable_label.set_mnemonic_widget(widget=self.enable_timer_check)
+
+        timer_accel_group = gtk.AccelGroup()
+        self.add_accel_group(timer_accel_group)
+        self.enable_timer_check.add_accelerator(accel_signal="clicked",
+                                                accel_group=timer_accel_group,
+                                                accel_key=gtk.gdk.keyval_from_name('e'),
+                                                accel_mods=gtk.gdk.MOD1_MASK, accel_flags=0)
+
+        timer_box.pack_start(child=enable_label, expand=False, fill=False, padding=0)
+        timer_box.pack_start(child=self.enable_timer_check, expand=False, fill=False, padding=0)
+
+        # ----------------------------------------------------------- #
+        timer_adjust = gtk.Adjustment(value=15, lower=1, upper=60, step_incr=1, page_incr=5)
+        self.timer_spin = gtk.SpinButton(adjustment=timer_adjust)
+        self.timer_spin.set_value(value=15)
+        timer_box.pack_start(child=self.timer_spin, expand=False, fill=False, padding=5)
+
+        self._content_area.pack_start(child=timer_frame, expand=False, fill=False, padding=5)
 
     def _generate_network_to_guess_container(self):
         """
@@ -174,7 +270,7 @@ class SubnetTester(gtk.Window):
 
         network_box.pack_start(child=self.new_network_button, expand=False, fill=False, padding=5)
 
-        self.content_area.pack_start(child=network_box, expand=False, fill=False, padding=5)
+        self._content_area.pack_start(child=network_box, expand=False, fill=False, padding=5)
 
     def _generate_guess_container(self):
         """
@@ -209,7 +305,7 @@ class SubnetTester(gtk.Window):
                           top_attach=1, bottom_attach=2)
 
         self.netmask_image = gtk.Image()
-        self.netmask_image.set_from_stock(gtk.STOCK_REMOVE,gtk.ICON_SIZE_MENU)
+        self.netmask_image.set_from_stock(gtk.STOCK_REMOVE, gtk.ICON_SIZE_MENU)
         guess_grid.attach(child=self.netmask_image, left_attach=5, right_attach=6,
                           top_attach=1, bottom_attach=2)
 
@@ -224,7 +320,7 @@ class SubnetTester(gtk.Window):
                           top_attach=2, bottom_attach=3)
 
         self.broadcast_image = gtk.Image()
-        self.broadcast_image.set_from_stock(gtk.STOCK_REMOVE,gtk.ICON_SIZE_MENU)
+        self.broadcast_image.set_from_stock(gtk.STOCK_REMOVE, gtk.ICON_SIZE_MENU)
         guess_grid.attach(child=self.broadcast_image, left_attach=5, right_attach=6,
                           top_attach=2, bottom_attach=3)
 
@@ -239,7 +335,7 @@ class SubnetTester(gtk.Window):
                           top_attach=3, bottom_attach=4)
 
         self.usable_image = gtk.Image()
-        self.usable_image.set_from_stock(gtk.STOCK_REMOVE,gtk.ICON_SIZE_MENU)
+        self.usable_image.set_from_stock(gtk.STOCK_REMOVE, gtk.ICON_SIZE_MENU)
         guess_grid.attach(child=self.usable_image, left_attach=5, right_attach=6,
                           top_attach=3, bottom_attach=4)
 
@@ -262,7 +358,7 @@ class SubnetTester(gtk.Window):
         guess_grid.attach(child=self.reveal_answer_button, left_attach=5, right_attach=6,
                           top_attach=5, bottom_attach=6)
 
-        self.content_area.pack_start(child=guess_grid, expand=False, fill=True, padding=5)
+        self._content_area.pack_start(child=guess_grid, expand=False, fill=True, padding=5)
 
     ###########################################################################
     #                                CALLBACKS                                #
@@ -275,6 +371,12 @@ class SubnetTester(gtk.Window):
             self.class_check_list.append(name)
         else:
             self.class_check_list.remove(name)
+
+    def _timer_enabled_checkbutton_toggled(self, widget, event=None):
+        """
+        Callback for the enable_timer CheckButton.
+        """
+        print event
 
     def _new_network_button_clicked(self, widget, event=None):
         """
